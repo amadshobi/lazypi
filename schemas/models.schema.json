@@ -1,0 +1,2230 @@
+{
+  "type": "object",
+  "required": [
+    "providers"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON schema reference"
+    },
+    "providers": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Display name of provider"
+            },
+            "baseUrl": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Base URL for the provider API"
+            },
+            "apiKey": {
+              "type": "string",
+              "minLength": 1,
+              "description": "API Key (supports $ENV, !command, or literal)"
+            },
+            "api": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "const": "openai-completions"
+                },
+                {
+                  "type": "string",
+                  "const": "openai-responses"
+                },
+                {
+                  "type": "string",
+                  "const": "anthropic-messages"
+                },
+                {
+                  "type": "string",
+                  "const": "google-generative-ai"
+                }
+              ]
+            },
+            "oauth": {
+              "type": "string",
+              "const": "radius"
+            },
+            "headers": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {
+                  "type": "string"
+                }
+              }
+            },
+            "compat": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "supportsStore": {
+                      "type": "boolean"
+                    },
+                    "supportsDeveloperRole": {
+                      "type": "boolean"
+                    },
+                    "supportsReasoningEffort": {
+                      "type": "boolean"
+                    },
+                    "supportsUsageInStreaming": {
+                      "type": "boolean"
+                    },
+                    "supportsFinishReason": {
+                      "type": "boolean"
+                    },
+                    "maxTokensField": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "max_completion_tokens"
+                        },
+                        {
+                          "type": "string",
+                          "const": "max_tokens"
+                        }
+                      ]
+                    },
+                    "requiresToolResultName": {
+                      "type": "boolean"
+                    },
+                    "requiresAssistantAfterToolResult": {
+                      "type": "boolean"
+                    },
+                    "requiresThinkingAsText": {
+                      "type": "boolean"
+                    },
+                    "requiresReasoningContentOnAssistantMessages": {
+                      "type": "boolean"
+                    },
+                    "thinkingFormat": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "openai"
+                        },
+                        {
+                          "type": "string",
+                          "const": "openrouter"
+                        },
+                        {
+                          "type": "string",
+                          "const": "together"
+                        },
+                        {
+                          "type": "string",
+                          "const": "baseten"
+                        },
+                        {
+                          "type": "string",
+                          "const": "deepseek"
+                        },
+                        {
+                          "type": "string",
+                          "const": "zai"
+                        },
+                        {
+                          "type": "string",
+                          "const": "qwen"
+                        },
+                        {
+                          "type": "string",
+                          "const": "chat-template"
+                        },
+                        {
+                          "type": "string",
+                          "const": "qwen-chat-template"
+                        },
+                        {
+                          "type": "string",
+                          "const": "string-thinking"
+                        },
+                        {
+                          "type": "string",
+                          "const": "ant-ling"
+                        }
+                      ]
+                    },
+                    "chatTemplateKwargs": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "required": [
+                                "$var"
+                              ],
+                              "properties": {
+                                "$var": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "const": "thinking.enabled"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "const": "thinking.effort"
+                                    }
+                                  ]
+                                },
+                                "omitWhenOff": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "chatTemplateArgs": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {
+                          "anyOf": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "required": [
+                                "$var"
+                              ],
+                              "properties": {
+                                "$var": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "const": "thinking.enabled"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "const": "thinking.effort"
+                                    }
+                                  ]
+                                },
+                                "omitWhenOff": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "cacheControlFormat": {
+                      "type": "string",
+                      "const": "anthropic"
+                    },
+                    "openRouterRouting": {
+                      "type": "object",
+                      "properties": {
+                        "allow_fallbacks": {
+                          "type": "boolean"
+                        },
+                        "require_parameters": {
+                          "type": "boolean"
+                        },
+                        "data_collection": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "const": "deny"
+                            },
+                            {
+                              "type": "string",
+                              "const": "allow"
+                            }
+                          ]
+                        },
+                        "zdr": {
+                          "type": "boolean"
+                        },
+                        "enforce_distillable_text": {
+                          "type": "boolean"
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "only": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "ignore": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "quantizations": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sort": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "by": {
+                                  "type": "string"
+                                },
+                                "partition": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "max_price": {
+                          "type": "object",
+                          "properties": {
+                            "prompt": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "completion": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "image": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "audio": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "request": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "preferred_min_throughput": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "p50": {
+                                  "type": "number",
+                                  "description": "50th percentile cutoff"
+                                },
+                                "p75": {
+                                  "type": "number",
+                                  "description": "75th percentile cutoff"
+                                },
+                                "p90": {
+                                  "type": "number",
+                                  "description": "90th percentile cutoff"
+                                },
+                                "p99": {
+                                  "type": "number",
+                                  "description": "99th percentile cutoff"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "preferred_max_latency": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "p50": {
+                                  "type": "number",
+                                  "description": "50th percentile cutoff"
+                                },
+                                "p75": {
+                                  "type": "number",
+                                  "description": "75th percentile cutoff"
+                                },
+                                "p90": {
+                                  "type": "number",
+                                  "description": "90th percentile cutoff"
+                                },
+                                "p99": {
+                                  "type": "number",
+                                  "description": "99th percentile cutoff"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "vercelGatewayRouting": {
+                      "type": "object",
+                      "properties": {
+                        "only": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "supportsOpenAIGrammarTools": {
+                      "type": "boolean"
+                    },
+                    "supportsStrictMode": {
+                      "type": "boolean"
+                    },
+                    "sendSessionAffinityHeaders": {
+                      "type": "boolean"
+                    },
+                    "sessionAffinityFormat": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "openai"
+                        },
+                        {
+                          "type": "string",
+                          "const": "openai-nosession"
+                        },
+                        {
+                          "type": "string",
+                          "const": "openrouter"
+                        }
+                      ]
+                    },
+                    "supportsLongCacheRetention": {
+                      "type": "boolean"
+                    },
+                    "vllmPriority": {
+                      "type": "number"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "supportsDeveloperRole": {
+                      "type": "boolean"
+                    },
+                    "sessionAffinityFormat": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "openai"
+                        },
+                        {
+                          "type": "string",
+                          "const": "openai-nosession"
+                        },
+                        {
+                          "type": "string",
+                          "const": "openrouter"
+                        }
+                      ]
+                    },
+                    "supportsLongCacheRetention": {
+                      "type": "boolean"
+                    },
+                    "supportsStrictMode": {
+                      "type": "boolean"
+                    },
+                    "supportsOpenAIGrammarTools": {
+                      "type": "boolean"
+                    },
+                    "supportsMaxOutputTokens": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "supportsEagerToolInputStreaming": {
+                      "type": "boolean"
+                    },
+                    "supportsLongCacheRetention": {
+                      "type": "boolean"
+                    },
+                    "sendSessionAffinityHeaders": {
+                      "type": "boolean"
+                    },
+                    "supportsCacheControlOnTools": {
+                      "type": "boolean"
+                    },
+                    "supportsTemperature": {
+                      "type": "boolean"
+                    },
+                    "forceAdaptiveThinking": {
+                      "type": "boolean"
+                    },
+                    "allowEmptySignature": {
+                      "type": "boolean"
+                    },
+                    "supportsStrictTools": {
+                      "type": "boolean"
+                    },
+                    "supportsMidConvoEffort": {
+                      "type": "boolean"
+                    },
+                    "allowedFallbackModels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "provider",
+                          "model",
+                          "cost"
+                        ],
+                        "properties": {
+                          "provider": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "model": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "cost": {
+                            "type": "object",
+                            "required": [
+                              "input",
+                              "output",
+                              "cacheRead",
+                              "cacheWrite"
+                            ],
+                            "properties": {
+                              "input": {
+                                "type": "number",
+                                "description": "Price per million input tokens ($)"
+                              },
+                              "output": {
+                                "type": "number",
+                                "description": "Price per million output tokens ($)"
+                              },
+                              "cacheRead": {
+                                "type": "number",
+                                "description": "Price per million cache read tokens ($)"
+                              },
+                              "cacheWrite": {
+                                "type": "number",
+                                "description": "Price per million cache write tokens ($)"
+                              },
+                              "tiers": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "required": [
+                                    "inputTokensAbove",
+                                    "input",
+                                    "output",
+                                    "cacheRead",
+                                    "cacheWrite"
+                                  ],
+                                  "properties": {
+                                    "inputTokensAbove": {
+                                      "type": "number"
+                                    },
+                                    "input": {
+                                      "type": "number",
+                                      "description": "Price per million input tokens ($)"
+                                    },
+                                    "output": {
+                                      "type": "number",
+                                      "description": "Price per million output tokens ($)"
+                                    },
+                                    "cacheRead": {
+                                      "type": "number",
+                                      "description": "Price per million cache read tokens ($)"
+                                    },
+                                    "cacheWrite": {
+                                      "type": "number",
+                                      "description": "Price per million cache write tokens ($)"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "maxItems": 3
+                    }
+                  }
+                }
+              ]
+            },
+            "authHeader": {
+              "type": "boolean",
+              "description": "Auto-add Authorization: Bearer header"
+            },
+            "models": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Model identifier passed to upstream API"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Human-readable model label in UI"
+                  },
+                  "api": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "const": "openai-completions"
+                      },
+                      {
+                        "type": "string",
+                        "const": "openai-responses"
+                      },
+                      {
+                        "type": "string",
+                        "const": "anthropic-messages"
+                      },
+                      {
+                        "type": "string",
+                        "const": "google-generative-ai"
+                      }
+                    ]
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "API base URL endpoint"
+                  },
+                  "reasoning": {
+                    "type": "boolean",
+                    "description": "Whether this model supports extended thinking / reasoning"
+                  },
+                  "thinkingLevelMap": {
+                    "type": "object",
+                    "properties": {
+                      "off": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "minimal": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "low": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "medium": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "high": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "xhigh": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "max": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "input": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "text"
+                        },
+                        {
+                          "type": "string",
+                          "const": "image"
+                        }
+                      ]
+                    }
+                  },
+                  "cost": {
+                    "type": "object",
+                    "required": [
+                      "input",
+                      "output",
+                      "cacheRead",
+                      "cacheWrite"
+                    ],
+                    "properties": {
+                      "input": {
+                        "type": "number",
+                        "description": "Price per million input tokens ($)"
+                      },
+                      "output": {
+                        "type": "number",
+                        "description": "Price per million output tokens ($)"
+                      },
+                      "cacheRead": {
+                        "type": "number",
+                        "description": "Price per million cache read tokens ($)"
+                      },
+                      "cacheWrite": {
+                        "type": "number",
+                        "description": "Price per million cache write tokens ($)"
+                      },
+                      "tiers": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "inputTokensAbove",
+                            "input",
+                            "output",
+                            "cacheRead",
+                            "cacheWrite"
+                          ],
+                          "properties": {
+                            "inputTokensAbove": {
+                              "type": "number"
+                            },
+                            "input": {
+                              "type": "number",
+                              "description": "Price per million input tokens ($)"
+                            },
+                            "output": {
+                              "type": "number",
+                              "description": "Price per million output tokens ($)"
+                            },
+                            "cacheRead": {
+                              "type": "number",
+                              "description": "Price per million cache read tokens ($)"
+                            },
+                            "cacheWrite": {
+                              "type": "number",
+                              "description": "Price per million cache write tokens ($)"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "contextWindow": {
+                    "type": "number",
+                    "description": "Context window size in tokens"
+                  },
+                  "maxTokens": {
+                    "type": "number",
+                    "description": "Maximum output tokens"
+                  },
+                  "samplingParams": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {}
+                    }
+                  },
+                  "headers": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^.*$": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "compat": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "supportsStore": {
+                            "type": "boolean"
+                          },
+                          "supportsDeveloperRole": {
+                            "type": "boolean"
+                          },
+                          "supportsReasoningEffort": {
+                            "type": "boolean"
+                          },
+                          "supportsUsageInStreaming": {
+                            "type": "boolean"
+                          },
+                          "supportsFinishReason": {
+                            "type": "boolean"
+                          },
+                          "maxTokensField": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "const": "max_completion_tokens"
+                              },
+                              {
+                                "type": "string",
+                                "const": "max_tokens"
+                              }
+                            ]
+                          },
+                          "requiresToolResultName": {
+                            "type": "boolean"
+                          },
+                          "requiresAssistantAfterToolResult": {
+                            "type": "boolean"
+                          },
+                          "requiresThinkingAsText": {
+                            "type": "boolean"
+                          },
+                          "requiresReasoningContentOnAssistantMessages": {
+                            "type": "boolean"
+                          },
+                          "thinkingFormat": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "const": "openai"
+                              },
+                              {
+                                "type": "string",
+                                "const": "openrouter"
+                              },
+                              {
+                                "type": "string",
+                                "const": "together"
+                              },
+                              {
+                                "type": "string",
+                                "const": "baseten"
+                              },
+                              {
+                                "type": "string",
+                                "const": "deepseek"
+                              },
+                              {
+                                "type": "string",
+                                "const": "zai"
+                              },
+                              {
+                                "type": "string",
+                                "const": "qwen"
+                              },
+                              {
+                                "type": "string",
+                                "const": "chat-template"
+                              },
+                              {
+                                "type": "string",
+                                "const": "qwen-chat-template"
+                              },
+                              {
+                                "type": "string",
+                                "const": "string-thinking"
+                              },
+                              {
+                                "type": "string",
+                                "const": "ant-ling"
+                              }
+                            ]
+                          },
+                          "chatTemplateKwargs": {
+                            "type": "object",
+                            "patternProperties": {
+                              "^.*$": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "required": [
+                                      "$var"
+                                    ],
+                                    "properties": {
+                                      "$var": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "const": "thinking.enabled"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "const": "thinking.effort"
+                                          }
+                                        ]
+                                      },
+                                      "omitWhenOff": {
+                                        "type": "boolean"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "chatTemplateArgs": {
+                            "type": "object",
+                            "patternProperties": {
+                              "^.*$": {
+                                "anyOf": [
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "required": [
+                                      "$var"
+                                    ],
+                                    "properties": {
+                                      "$var": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "const": "thinking.enabled"
+                                          },
+                                          {
+                                            "type": "string",
+                                            "const": "thinking.effort"
+                                          }
+                                        ]
+                                      },
+                                      "omitWhenOff": {
+                                        "type": "boolean"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "cacheControlFormat": {
+                            "type": "string",
+                            "const": "anthropic"
+                          },
+                          "openRouterRouting": {
+                            "type": "object",
+                            "properties": {
+                              "allow_fallbacks": {
+                                "type": "boolean"
+                              },
+                              "require_parameters": {
+                                "type": "boolean"
+                              },
+                              "data_collection": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "const": "deny"
+                                  },
+                                  {
+                                    "type": "string",
+                                    "const": "allow"
+                                  }
+                                ]
+                              },
+                              "zdr": {
+                                "type": "boolean"
+                              },
+                              "enforce_distillable_text": {
+                                "type": "boolean"
+                              },
+                              "order": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "only": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "ignore": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "quantizations": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "sort": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "by": {
+                                        "type": "string"
+                                      },
+                                      "partition": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "max_price": {
+                                "type": "object",
+                                "properties": {
+                                  "prompt": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "completion": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "image": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "audio": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "request": {
+                                    "anyOf": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              "preferred_min_throughput": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "p50": {
+                                        "type": "number",
+                                        "description": "50th percentile cutoff"
+                                      },
+                                      "p75": {
+                                        "type": "number",
+                                        "description": "75th percentile cutoff"
+                                      },
+                                      "p90": {
+                                        "type": "number",
+                                        "description": "90th percentile cutoff"
+                                      },
+                                      "p99": {
+                                        "type": "number",
+                                        "description": "99th percentile cutoff"
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "preferred_max_latency": {
+                                "anyOf": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "p50": {
+                                        "type": "number",
+                                        "description": "50th percentile cutoff"
+                                      },
+                                      "p75": {
+                                        "type": "number",
+                                        "description": "75th percentile cutoff"
+                                      },
+                                      "p90": {
+                                        "type": "number",
+                                        "description": "90th percentile cutoff"
+                                      },
+                                      "p99": {
+                                        "type": "number",
+                                        "description": "99th percentile cutoff"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "vercelGatewayRouting": {
+                            "type": "object",
+                            "properties": {
+                              "only": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "order": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "supportsOpenAIGrammarTools": {
+                            "type": "boolean"
+                          },
+                          "supportsStrictMode": {
+                            "type": "boolean"
+                          },
+                          "sendSessionAffinityHeaders": {
+                            "type": "boolean"
+                          },
+                          "sessionAffinityFormat": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "const": "openai"
+                              },
+                              {
+                                "type": "string",
+                                "const": "openai-nosession"
+                              },
+                              {
+                                "type": "string",
+                                "const": "openrouter"
+                              }
+                            ]
+                          },
+                          "supportsLongCacheRetention": {
+                            "type": "boolean"
+                          },
+                          "vllmPriority": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "supportsDeveloperRole": {
+                            "type": "boolean"
+                          },
+                          "sessionAffinityFormat": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "const": "openai"
+                              },
+                              {
+                                "type": "string",
+                                "const": "openai-nosession"
+                              },
+                              {
+                                "type": "string",
+                                "const": "openrouter"
+                              }
+                            ]
+                          },
+                          "supportsLongCacheRetention": {
+                            "type": "boolean"
+                          },
+                          "supportsStrictMode": {
+                            "type": "boolean"
+                          },
+                          "supportsOpenAIGrammarTools": {
+                            "type": "boolean"
+                          },
+                          "supportsMaxOutputTokens": {
+                            "type": "boolean"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "supportsEagerToolInputStreaming": {
+                            "type": "boolean"
+                          },
+                          "supportsLongCacheRetention": {
+                            "type": "boolean"
+                          },
+                          "sendSessionAffinityHeaders": {
+                            "type": "boolean"
+                          },
+                          "supportsCacheControlOnTools": {
+                            "type": "boolean"
+                          },
+                          "supportsTemperature": {
+                            "type": "boolean"
+                          },
+                          "forceAdaptiveThinking": {
+                            "type": "boolean"
+                          },
+                          "allowEmptySignature": {
+                            "type": "boolean"
+                          },
+                          "supportsStrictTools": {
+                            "type": "boolean"
+                          },
+                          "supportsMidConvoEffort": {
+                            "type": "boolean"
+                          },
+                          "allowedFallbackModels": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "provider",
+                                "model",
+                                "cost"
+                              ],
+                              "properties": {
+                                "provider": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "model": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "cost": {
+                                  "type": "object",
+                                  "required": [
+                                    "input",
+                                    "output",
+                                    "cacheRead",
+                                    "cacheWrite"
+                                  ],
+                                  "properties": {
+                                    "input": {
+                                      "type": "number",
+                                      "description": "Price per million input tokens ($)"
+                                    },
+                                    "output": {
+                                      "type": "number",
+                                      "description": "Price per million output tokens ($)"
+                                    },
+                                    "cacheRead": {
+                                      "type": "number",
+                                      "description": "Price per million cache read tokens ($)"
+                                    },
+                                    "cacheWrite": {
+                                      "type": "number",
+                                      "description": "Price per million cache write tokens ($)"
+                                    },
+                                    "tiers": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "required": [
+                                          "inputTokensAbove",
+                                          "input",
+                                          "output",
+                                          "cacheRead",
+                                          "cacheWrite"
+                                        ],
+                                        "properties": {
+                                          "inputTokensAbove": {
+                                            "type": "number"
+                                          },
+                                          "input": {
+                                            "type": "number",
+                                            "description": "Price per million input tokens ($)"
+                                          },
+                                          "output": {
+                                            "type": "number",
+                                            "description": "Price per million output tokens ($)"
+                                          },
+                                          "cacheRead": {
+                                            "type": "number",
+                                            "description": "Price per million cache read tokens ($)"
+                                          },
+                                          "cacheWrite": {
+                                            "type": "number",
+                                            "description": "Price per million cache write tokens ($)"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "maxItems": 3
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "modelOverrides": {
+              "type": "object",
+              "patternProperties": {
+                "^.*$": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reasoning": {
+                      "type": "boolean"
+                    },
+                    "thinkingLevelMap": {
+                      "type": "object",
+                      "properties": {
+                        "off": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "minimal": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "low": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "medium": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "high": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "xhigh": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "max": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "input": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "const": "text"
+                          },
+                          {
+                            "type": "string",
+                            "const": "image"
+                          }
+                        ]
+                      }
+                    },
+                    "cost": {
+                      "type": "object",
+                      "properties": {
+                        "input": {
+                          "type": "number"
+                        },
+                        "output": {
+                          "type": "number"
+                        },
+                        "cacheRead": {
+                          "type": "number"
+                        },
+                        "cacheWrite": {
+                          "type": "number"
+                        },
+                        "tiers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "inputTokensAbove",
+                              "input",
+                              "output",
+                              "cacheRead",
+                              "cacheWrite"
+                            ],
+                            "properties": {
+                              "inputTokensAbove": {
+                                "type": "number"
+                              },
+                              "input": {
+                                "type": "number",
+                                "description": "Price per million input tokens ($)"
+                              },
+                              "output": {
+                                "type": "number",
+                                "description": "Price per million output tokens ($)"
+                              },
+                              "cacheRead": {
+                                "type": "number",
+                                "description": "Price per million cache read tokens ($)"
+                              },
+                              "cacheWrite": {
+                                "type": "number",
+                                "description": "Price per million cache write tokens ($)"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "contextWindow": {
+                      "type": "number"
+                    },
+                    "maxTokens": {
+                      "type": "number"
+                    },
+                    "samplingParams": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {}
+                      }
+                    },
+                    "headers": {
+                      "type": "object",
+                      "patternProperties": {
+                        "^.*$": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "compat": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "supportsStore": {
+                              "type": "boolean"
+                            },
+                            "supportsDeveloperRole": {
+                              "type": "boolean"
+                            },
+                            "supportsReasoningEffort": {
+                              "type": "boolean"
+                            },
+                            "supportsUsageInStreaming": {
+                              "type": "boolean"
+                            },
+                            "supportsFinishReason": {
+                              "type": "boolean"
+                            },
+                            "maxTokensField": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "const": "max_completion_tokens"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "max_tokens"
+                                }
+                              ]
+                            },
+                            "requiresToolResultName": {
+                              "type": "boolean"
+                            },
+                            "requiresAssistantAfterToolResult": {
+                              "type": "boolean"
+                            },
+                            "requiresThinkingAsText": {
+                              "type": "boolean"
+                            },
+                            "requiresReasoningContentOnAssistantMessages": {
+                              "type": "boolean"
+                            },
+                            "thinkingFormat": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "const": "openai"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "openrouter"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "together"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "baseten"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "deepseek"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "zai"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "qwen"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "chat-template"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "qwen-chat-template"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "string-thinking"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "ant-ling"
+                                }
+                              ]
+                            },
+                            "chatTemplateKwargs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^.*$": {
+                                  "anyOf": [
+                                    {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "required": [
+                                        "$var"
+                                      ],
+                                      "properties": {
+                                        "$var": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string",
+                                              "const": "thinking.enabled"
+                                            },
+                                            {
+                                              "type": "string",
+                                              "const": "thinking.effort"
+                                            }
+                                          ]
+                                        },
+                                        "omitWhenOff": {
+                                          "type": "boolean"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "chatTemplateArgs": {
+                              "type": "object",
+                              "patternProperties": {
+                                "^.*$": {
+                                  "anyOf": [
+                                    {
+                                      "anyOf": [
+                                        {
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "boolean"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "required": [
+                                        "$var"
+                                      ],
+                                      "properties": {
+                                        "$var": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string",
+                                              "const": "thinking.enabled"
+                                            },
+                                            {
+                                              "type": "string",
+                                              "const": "thinking.effort"
+                                            }
+                                          ]
+                                        },
+                                        "omitWhenOff": {
+                                          "type": "boolean"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "cacheControlFormat": {
+                              "type": "string",
+                              "const": "anthropic"
+                            },
+                            "openRouterRouting": {
+                              "type": "object",
+                              "properties": {
+                                "allow_fallbacks": {
+                                  "type": "boolean"
+                                },
+                                "require_parameters": {
+                                  "type": "boolean"
+                                },
+                                "data_collection": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "const": "deny"
+                                    },
+                                    {
+                                      "type": "string",
+                                      "const": "allow"
+                                    }
+                                  ]
+                                },
+                                "zdr": {
+                                  "type": "boolean"
+                                },
+                                "enforce_distillable_text": {
+                                  "type": "boolean"
+                                },
+                                "order": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "only": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "ignore": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "quantizations": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "sort": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "by": {
+                                          "type": "string"
+                                        },
+                                        "partition": {
+                                          "anyOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "null"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "max_price": {
+                                  "type": "object",
+                                  "properties": {
+                                    "prompt": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "completion": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "image": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "audio": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    },
+                                    "request": {
+                                      "anyOf": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "preferred_min_throughput": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "p50": {
+                                          "type": "number",
+                                          "description": "50th percentile cutoff"
+                                        },
+                                        "p75": {
+                                          "type": "number",
+                                          "description": "75th percentile cutoff"
+                                        },
+                                        "p90": {
+                                          "type": "number",
+                                          "description": "90th percentile cutoff"
+                                        },
+                                        "p99": {
+                                          "type": "number",
+                                          "description": "99th percentile cutoff"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "preferred_max_latency": {
+                                  "anyOf": [
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "p50": {
+                                          "type": "number",
+                                          "description": "50th percentile cutoff"
+                                        },
+                                        "p75": {
+                                          "type": "number",
+                                          "description": "75th percentile cutoff"
+                                        },
+                                        "p90": {
+                                          "type": "number",
+                                          "description": "90th percentile cutoff"
+                                        },
+                                        "p99": {
+                                          "type": "number",
+                                          "description": "99th percentile cutoff"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "vercelGatewayRouting": {
+                              "type": "object",
+                              "properties": {
+                                "only": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                },
+                                "order": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "supportsOpenAIGrammarTools": {
+                              "type": "boolean"
+                            },
+                            "supportsStrictMode": {
+                              "type": "boolean"
+                            },
+                            "sendSessionAffinityHeaders": {
+                              "type": "boolean"
+                            },
+                            "sessionAffinityFormat": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "const": "openai"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "openai-nosession"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "openrouter"
+                                }
+                              ]
+                            },
+                            "supportsLongCacheRetention": {
+                              "type": "boolean"
+                            },
+                            "vllmPriority": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "supportsDeveloperRole": {
+                              "type": "boolean"
+                            },
+                            "sessionAffinityFormat": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "const": "openai"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "openai-nosession"
+                                },
+                                {
+                                  "type": "string",
+                                  "const": "openrouter"
+                                }
+                              ]
+                            },
+                            "supportsLongCacheRetention": {
+                              "type": "boolean"
+                            },
+                            "supportsStrictMode": {
+                              "type": "boolean"
+                            },
+                            "supportsOpenAIGrammarTools": {
+                              "type": "boolean"
+                            },
+                            "supportsMaxOutputTokens": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "supportsEagerToolInputStreaming": {
+                              "type": "boolean"
+                            },
+                            "supportsLongCacheRetention": {
+                              "type": "boolean"
+                            },
+                            "sendSessionAffinityHeaders": {
+                              "type": "boolean"
+                            },
+                            "supportsCacheControlOnTools": {
+                              "type": "boolean"
+                            },
+                            "supportsTemperature": {
+                              "type": "boolean"
+                            },
+                            "forceAdaptiveThinking": {
+                              "type": "boolean"
+                            },
+                            "allowEmptySignature": {
+                              "type": "boolean"
+                            },
+                            "supportsStrictTools": {
+                              "type": "boolean"
+                            },
+                            "supportsMidConvoEffort": {
+                              "type": "boolean"
+                            },
+                            "allowedFallbackModels": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "required": [
+                                  "provider",
+                                  "model",
+                                  "cost"
+                                ],
+                                "properties": {
+                                  "provider": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "model": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "cost": {
+                                    "type": "object",
+                                    "required": [
+                                      "input",
+                                      "output",
+                                      "cacheRead",
+                                      "cacheWrite"
+                                    ],
+                                    "properties": {
+                                      "input": {
+                                        "type": "number",
+                                        "description": "Price per million input tokens ($)"
+                                      },
+                                      "output": {
+                                        "type": "number",
+                                        "description": "Price per million output tokens ($)"
+                                      },
+                                      "cacheRead": {
+                                        "type": "number",
+                                        "description": "Price per million cache read tokens ($)"
+                                      },
+                                      "cacheWrite": {
+                                        "type": "number",
+                                        "description": "Price per million cache write tokens ($)"
+                                      },
+                                      "tiers": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "object",
+                                          "required": [
+                                            "inputTokensAbove",
+                                            "input",
+                                            "output",
+                                            "cacheRead",
+                                            "cacheWrite"
+                                          ],
+                                          "properties": {
+                                            "inputTokensAbove": {
+                                              "type": "number"
+                                            },
+                                            "input": {
+                                              "type": "number",
+                                              "description": "Price per million input tokens ($)"
+                                            },
+                                            "output": {
+                                              "type": "number",
+                                              "description": "Price per million output tokens ($)"
+                                            },
+                                            "cacheRead": {
+                                              "type": "number",
+                                              "description": "Price per million cache read tokens ($)"
+                                            },
+                                            "cacheWrite": {
+                                              "type": "number",
+                                              "description": "Price per million cache write tokens ($)"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "maxItems": 3
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Configured LLM providers"
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pi Coding Agent Models Configuration",
+  "description": "JSON Schema for ~/.pi/agent/models.json"
+}
