@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/amadshobi/lazypi/main/schemas/agents.schema.json",
+  "title": "Lazypi Agents Configuration",
+  "description": "OpenCode-style primary and subagent configuration for Pi Coding Agent and PiChamber",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "defaultAgent": {
+      "type": "string",
+      "description": "Default primary agent name for new sessions (e.g. 'blin')"
+    },
+    "agent": {
+      "type": "object",
+      "description": "Map of agent ID to agent configuration",
+      "additionalProperties": {
+        "$ref": "#/definitions/AgentEntry"
+      }
+    }
+  },
+  "definitions": {
+    "AgentEntry": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Optional display name override"
+        },
+        "description": {
+          "type": "string",
+          "description": "Short summary of the agent's role and specialty"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["primary", "subagent", "all"],
+          "default": "all",
+          "description": "'primary' = chat selector only, 'subagent' = subagent tool only, 'all' = both"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Inline system prompt string or file reference '{file:~/path/to/persona.md}'"
+        },
+        "model": {
+          "type": "string",
+          "description": "Optional preferred model ID (e.g. 'nexus/google-antigravity/claude-sonnet-4-6')"
+        },
+        "thinking": {
+          "type": "string",
+          "enum": ["off", "minimal", "low", "medium", "high", "xhigh", "max"],
+          "description": "Optional default thinking/effort level"
+        },
+        "tools": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            {
+              "type": "object",
+              "additionalProperties": { "type": "boolean" }
+            }
+          ],
+          "description": "Allowed tools list (e.g. ['read', 'bash', 'edit', 'write']) or boolean map"
+        },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed skill names (use ['*'] for all skills, [] for no skills)"
+        },
+        "stripGlobalContext": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, strips global ~/.pi/agent/AGENTS.md and ~/AGENTS.md to save context tokens"
+        },
+        "color": {
+          "type": "string",
+          "description": "Optional badge color hex or token"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Sprite icon name from the PiChamber icon registry (e.g. 'robot-2', 'hammer', 'search'). Auto-resolved from the agent id/name keywords when omitted."
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  }
+}

@@ -277,171 +277,85 @@ export const isPiChamber = (ctx: { mode: string; hasUI: boolean }): boolean => {
 	return ctx.mode === "rpc" && ctx.hasUI === true;
 };
 
-function getSubagentCacheDir(): string {
-	const dir = path.join(os.homedir(), ".cache", "lazypi", "subagents");
-	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, { recursive: true });
+function encodePiSessionCwd(cwd: string): string {
+	return `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
+}
+
+function getSubagentSessionFilePath(cwd: string, subagentId: string, parentSessionFile?: string, agentName?: string, task?: string): string {
+	const resolvedCwd = path.resolve(cwd);
+	const sessionDir = path.join(getAgentDir(), "sessions", encodePiSessionCwd(resolvedCwd));
+	if (!fs.existsSync(sessionDir)) {
+		fs.mkdirSync(sessionDir, { recursive: true });
 	}
-	return dir;
-}
-
-function publishSubagentCard(
-	pi: ExtensionAPI,
-	result: SingleResult,
-	status: "running" | "completed" | "failed",
-) {
-	const tone = status === "running" ? "warning" : status === "completed" ? "success" : "error";
-	const stats = formatUsageStats(result.usage, result.model) || "0 turns";
-	pi.appendEntry("pichamber.ui", {
-		protocol: "pichamber-extension-ui",
-		version: 1,
-		id: `subagent-${result.id}`,
-		title: `Subagent [${result.agent}] (${result.id})`,
-		component: "kv",
-		props: {
-			rows: [
-				{ label: "Subagent ID", value: result.id, tone: "info" },
-				{ label: "Agent", value: result.agent },
-				{
-					label: "Status",
-					value: status === "running" ? "Running..." : status === "completed" ? "Completed" : "Failed",
-					tone,
-				},
-				{ label: "Task", value: result.task.length > 120 ? `${result.task.slice(0, 120)}...` : result.task },
-				{ label: "Stats", value: stats },
-			],
-		},
-		actions: [
-			{ label: "🔍 Inspect Subagent", command: "subagent-inspect", args: result.id, variant: "outline" },
-		],
-	});
-}
-
-function listRecentSubagents(): Array<{ id: string; mtime: number; size: number }> {
-	const dir = getSubagentCacheDir();
-	try {
-		const files = fs.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
-		return files
-			.map((f) => {
-				const stat = fs.statSync(path.join(dir, f));
-				return {
-					id: f.replace(/\.jsonl$/, ""),
-					mtime: stat.mtimeMs,
-					size: stat.size,
-				};
-			})
-			.sort((a, b) => b.mtime - a.mtime);
-	} catch {
-		return [];
-	}
-}
-
-function renderSubagentHtml(id: string, lines: string[]): string {
-	const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-	let itemsHtml = "";
-	for (const line of lines) {
+	const filePath = path.join(sessionDir, `${subagentId}.jsonl`);
+	if (!fs.existsSync(filePath)) {
+		const timestamp = new Date().toISOString();
+		const header = {
+			type: "session",
+			version: 3,
+			id: subagentId,
+			timestamp,
+			cwd: resolvedCwd,
+			...(parentSessionFile ? { parentSession: parentSessionFile } : {}),
+		};
+		const shortTask = (task || "").replace(/\s+/g, " ").trim().slice(0, 80);
+		const info = {
+			type: "session_info",
+			id: "subinfo1",
+			parentId: null,
+			timestamp,
+			name: `[${agentName || "subagent"}] ${shortTask || subagentId}`,
+		};
 		try {
-			const record = JSON.parse(line);
-			if (record.type === "message" && record.message) {
-				const m = record.message;
-				const isUser = m.role === "user";
-				const roleName = isUser ? "User / Delegator" : `Subagent (${m.role})`;
-				const roleColor = isUser ? "#38bdf8" : "#4ade80";
-				let bodyHtml = "";
-				if (typeof m.content === "string") {
-					bodyHtml = `<pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">${esc(m.content)}</pre>`;
-				} else if (Array.isArray(m.content)) {
-					for (const part of m.content) {
-						if (part.type === "text") {
-							bodyHtml += `<pre style="white-space: pre-wrap; font-family: inherit; margin: 4px 0;">${esc(part.text)}</pre>`;
-						} else if (part.type === "toolCall" || part.type === "tool_use") {
-							bodyHtml += `<div style="margin: 6px 0; padding: 6px 8px; background: rgba(255,255,255,0.06); border-left: 3px solid #a855f7; border-radius: 4px; font-family: monospace; font-size: 12px;"><strong>Tool Call:</strong> ${esc(part.name || part.toolName)} <code>${esc(JSON.stringify(part.args || part.input || {}))}</code></div>`;
-						}
-					}
-				}
-				itemsHtml += `
-					<div style="margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 10px; background: rgba(255,255,255,0.02);">
-						<div style="font-size: 11px; font-weight: bold; color: ${roleColor}; text-transform: uppercase; margin-bottom: 6px;">${roleName}</div>
-						<div style="font-size: 13px; line-height: 1.4;">${bodyHtml}</div>
-					</div>
-				`;
-			}
+			fs.writeFileSync(filePath, `${JSON.stringify(header)}\n${JSON.stringify(info)}\n`, "utf-8");
 		} catch {}
 	}
-
-	return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f1f5f9; margin: 0; padding: 16px; font-size: 13px; }
-.top-bar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 12px; margin-bottom: 16px; }
-.badge { background: #1e293b; border: 1px solid #334155; padding: 2px 8px; border-radius: 4px; font-family: monospace; color: #38bdf8; }
-.btn { background: #334155; color: #f8fafc; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
-.btn:hover { background: #475569; }
-</style>
-</head>
-<body>
-<div class="top-bar">
-  <div>
-    <h3 style="margin: 0 0 4px 0;">Subagent Inspector</h3>
-    <span class="badge">${esc(id)}</span>
-  </div>
-  <button class="btn" data-pichamber-command="subagent-inspect">← Back / Refresh</button>
-</div>
-<div>
-  ${itemsHtml || '<div style="opacity: 0.5; text-align: center; padding: 30px 0;">No messages found in session.</div>'}
-</div>
-</body>
-</html>`;
+	return filePath;
 }
 
-async function inspectSubagent(pi: ExtensionAPI, ctx: any, id: string) {
-	const sessionFile = path.join(getSubagentCacheDir(), `${id}.jsonl`);
-	if (!fs.existsSync(sessionFile)) {
-		if (ctx.hasUI && ctx.ui.notify) {
-			await ctx.ui.notify(`Subagent session "${id}" not found.`);
-		}
-		return;
-	}
+interface TaskMetadataSummaryItem {
+	id: string;
+	tool: string;
+	state: {
+		status: string;
+		title?: string;
+		input?: Record<string, unknown>;
+	};
+}
 
-	const content = fs.readFileSync(sessionFile, "utf-8");
-	const lines = content.split("\n").filter(Boolean);
-
-	if (isPiChamber(ctx)) {
-		pi.appendEntry("pichamber.app", {
-			protocol: "pichamber-extension-ui",
-			version: 1,
-			appId: `inspect-${id}`,
-			title: `Subagent Inspector: ${id}`,
-			html: renderSubagentHtml(id, lines),
-		});
-	} else {
-		// CLI TUI inspection
-		let transcript = `### Subagent Inspector: ${id}\n\n`;
-		for (const line of lines) {
-			try {
-				const record = JSON.parse(line);
-				if (record.type === "message" && record.message) {
-					const m = record.message;
-					const role = m.role === "user" ? "**User**" : `**${m.role}**`;
-					let body = "";
-					if (typeof m.content === "string") body = m.content;
-					else if (Array.isArray(m.content)) {
-						for (const p of m.content) {
-							if (p.type === "text") body += p.text + "\n";
-							else if (p.type === "toolCall" || p.type === "tool_use")
-								body += `*Tool: ${p.name || p.toolName}*\n`;
-						}
-					}
-					transcript += `${role}:\n${body.trim()}\n\n---\n\n`;
+function buildTaskMetadataBlock(result: SingleResult, isRunning: boolean): string {
+	const summary: TaskMetadataSummaryItem[] = [];
+	let callIndex = 0;
+	for (const msg of result.messages) {
+		if (msg.role === "assistant" && Array.isArray(msg.content)) {
+			for (const part of msg.content) {
+				if (part.type === "toolCall") {
+					callIndex++;
+					const args = (part.arguments && typeof part.arguments === "object" ? part.arguments : {}) as Record<string, unknown>;
+					const rawTitle =
+						(typeof args.path === "string" && args.path) ||
+						(typeof args.file_path === "string" && args.file_path) ||
+						(typeof args.command === "string" && args.command.slice(0, 80)) ||
+						(typeof args.pattern === "string" && args.pattern) ||
+						"";
+					summary.push({
+						id: part.id || `${result.id}_tc_${callIndex}`,
+						tool: part.name || "tool",
+						state: {
+							status: isRunning ? "running" : "completed",
+							...(rawTitle ? { title: rawTitle } : {}),
+							input: args,
+						},
+					});
 				}
-			} catch {}
-		}
-		if (ctx.hasUI && ctx.ui.select) {
-			await ctx.ui.select("Subagent Transcript:", [id, "Close"]);
+			}
 		}
 	}
+	const payload = {
+		sessionId: result.id,
+		summary,
+	};
+	return `\n\n<task_metadata>\n${JSON.stringify(payload)}\n</task_metadata>`;
 }
 
 type OnUpdateCallback = (partial: AgentToolResult<SubagentDetails>) => void;
@@ -462,20 +376,26 @@ async function runSingleAgent(
 	signal: AbortSignal | undefined,
 	onUpdate: OnUpdateCallback | undefined,
 	makeDetails: (results: SingleResult[]) => SubagentDetails,
-	pi?: ExtensionAPI,
-	ctxHasUI?: boolean,
-	ctxMode?: string,
+	_pi?: ExtensionAPI,
+	_ctxHasUI?: boolean,
+	_ctxMode?: string,
 	requestedId?: string,
+	parentSessionFile?: string,
 ): Promise<SingleResult> {
 	const subagentId = requestedId?.trim()
 		? requestedId.trim().replace(/[^a-zA-Z0-9_-]/g, "_")
 		: `sub_${agentName}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-	const sessionFilePath = path.join(getSubagentCacheDir(), `${subagentId}.jsonl`);
+	const effectiveCwd = cwd ?? defaultCwd;
+	const sessionFilePath = getSubagentSessionFilePath(effectiveCwd, subagentId, parentSessionFile, agentName, task);
 
 	const agent = agents.find((a) => a.name === agentName);
 
 	if (!agent) {
-		const available = agents.map((a) => `"${a.name}"`).join(", ") || "none";
+		const available =
+			agents
+				.filter((a) => a.mode === "subagent" || a.mode === "all")
+				.map((a) => `"${a.name}"`)
+				.join(", ") || "none";
 		return {
 			id: subagentId,
 			agent: agentName,
@@ -483,7 +403,21 @@ async function runSingleAgent(
 			task,
 			exitCode: 1,
 			messages: [],
-			stderr: `Unknown agent: "${agentName}". Available agents: ${available}.`,
+			stderr: `Unknown agent: "${agentName}". Available subagents: ${available}.`,
+			usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, contextTokens: 0, turns: 0 },
+			step,
+		};
+	}
+
+	if (agent.mode === "primary") {
+		return {
+			id: subagentId,
+			agent: agentName,
+			agentSource: agent.source,
+			task,
+			exitCode: 1,
+			messages: [],
+			stderr: `Agent "${agentName}" has mode="primary" and can only be used directly in chat, not spawned as a subagent.`,
 			usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0, contextTokens: 0, turns: 0 },
 			step,
 		};
@@ -492,11 +426,13 @@ async function runSingleAgent(
 	const args: string[] = ["--mode", "json", "-p", "--session", sessionFilePath];
 
 	// Skill isolation: disable generic skill loading, whitelist specific agent skills if configured
-	args.push("--no-skills");
-	if (agent.skills && agent.skills.length > 0) {
-		for (const skillName of agent.skills) {
-			const skillPath = resolveSkillPath(skillName, cwd ?? defaultCwd);
-			if (skillPath) args.push("--skill", skillPath);
+	if (!agent.skills || !agent.skills.includes("*")) {
+		args.push("--no-skills");
+		if (agent.skills && agent.skills.length > 0) {
+			for (const skillName of agent.skills) {
+				const skillPath = resolveSkillPath(skillName, effectiveCwd);
+				if (skillPath) args.push("--skill", skillPath);
+			}
 		}
 	}
 
@@ -535,13 +471,16 @@ async function runSingleAgent(
 
 	const emitUpdate = () => {
 		if (onUpdate) {
+			const runningOutput = getFinalOutput(currentResult.messages) || "(running...)";
 			onUpdate({
-				content: [{ type: "text", text: `[${subagentId}]\n${getFinalOutput(currentResult.messages) || "(running...)"}` }],
+				content: [
+					{
+						type: "text",
+						text: `[Subagent ID: ${subagentId}]\n${runningOutput}${buildTaskMetadataBlock(currentResult, true)}`,
+					},
+				],
 				details: makeDetails([currentResult]),
 			});
-		}
-		if (pi && ctxMode && isPiChamber({ mode: ctxMode, hasUI: !!ctxHasUI })) {
-			publishSubagentCard(pi, currentResult, "running");
 		}
 	};
 
@@ -636,9 +575,6 @@ async function runSingleAgent(
 		});
 
 		currentResult.exitCode = exitCode;
-		if (pi && ctxMode && isPiChamber({ mode: ctxMode, hasUI: !!ctxHasUI })) {
-			publishSubagentCard(pi, currentResult, isFailedResult(currentResult) ? "failed" : "completed");
-		}
 		if (wasAborted) throw new Error("Subagent was aborted");
 		return currentResult;
 	} finally {
@@ -768,6 +704,8 @@ export default function (pi: ExtensionAPI) {
 				}
 			}
 
+			const parentSessionFile = ctx.sessionManager?.getSessionFile?.() ?? undefined;
+
 			if (params.chain && params.chain.length > 0) {
 				const results: SingleResult[] = [];
 				let previousOutput = "";
@@ -806,6 +744,7 @@ export default function (pi: ExtensionAPI) {
 						ctx.hasUI,
 						ctx.mode,
 						step.id,
+						parentSessionFile,
 					);
 					results.push(result);
 
@@ -813,15 +752,27 @@ export default function (pi: ExtensionAPI) {
 					if (isError) {
 						const errorMsg = getResultOutput(result);
 						return {
-							content: [{ type: "text", text: `Chain stopped at step ${i + 1} (${step.agent}): ${errorMsg}` }],
+							content: [
+								{
+									type: "text",
+									text: `Chain stopped at step ${i + 1} (${step.agent}) [Subagent ID: ${result.id}]: ${errorMsg}${buildTaskMetadataBlock(result, false)}`,
+								},
+							],
 							details: makeDetails("chain")(results),
 							isError: true,
 						};
 					}
 					previousOutput = getFinalOutput(result.messages);
 				}
+				const lastResult = results[results.length - 1];
+				const stepIds = results.map((r) => `${r.agent}=${r.id}`).join(", ");
 				return {
-					content: [{ type: "text", text: getFinalOutput(results[results.length - 1].messages) || "(no output)" }],
+					content: [
+						{
+							type: "text",
+							text: `[Subagent IDs: ${stepIds}]\n${getFinalOutput(lastResult.messages) || "(no output)"}${buildTaskMetadataBlock(lastResult, false)}`,
+						},
+					],
 					details: makeDetails("chain")(results),
 				};
 			}
@@ -891,6 +842,7 @@ export default function (pi: ExtensionAPI) {
 						ctx.hasUI,
 						ctx.mode,
 						t.id,
+						parentSessionFile,
 					);
 					allResults[index] = result;
 					emitParallelUpdate();
@@ -903,13 +855,14 @@ export default function (pi: ExtensionAPI) {
 					const status = isFailedResult(r)
 						? `failed${r.stopReason && r.stopReason !== "end" ? ` (${r.stopReason})` : ""}`
 						: "completed";
-					return `### [${r.agent}] ${status}\n\n${output}`;
+					return `### [${r.agent}] (Subagent ID: ${r.id}) ${status}\n\n${output}`;
 				});
+				const firstResult = results[0];
 				return {
 					content: [
 						{
 							type: "text",
-							text: `Parallel: ${successCount}/${results.length} succeeded\n\n${summaries.join("\n\n---\n\n")}`,
+							text: `Parallel: ${successCount}/${results.length} succeeded\n\n${summaries.join("\n\n---\n\n")}${firstResult ? buildTaskMetadataBlock(firstResult, false) : ""}`,
 						},
 					],
 					details: makeDetails("parallel")(results),
@@ -932,12 +885,18 @@ export default function (pi: ExtensionAPI) {
 					ctx.hasUI,
 					ctx.mode,
 					params.id,
+					parentSessionFile,
 				);
 				const isError = isFailedResult(result);
 				if (isError) {
 					const errorMsg = getResultOutput(result);
 					return {
-						content: [{ type: "text", text: `Agent ${result.stopReason || "failed"} [${result.id}]: ${errorMsg}` }],
+						content: [
+							{
+								type: "text",
+								text: `Agent ${result.stopReason || "failed"} [Subagent ID: ${result.id}]: ${errorMsg}${buildTaskMetadataBlock(result, false)}`,
+							},
+						],
 						details: makeDetails("single")([result]),
 						isError: true,
 					};
@@ -946,7 +905,7 @@ export default function (pi: ExtensionAPI) {
 					content: [
 						{
 							type: "text",
-							text: `[Subagent ID: ${result.id}]\n${getFinalOutput(result.messages) || "(no output)"}`,
+							text: `[Subagent ID: ${result.id}]\n${getFinalOutput(result.messages) || "(no output)"}${buildTaskMetadataBlock(result, false)}`,
 						},
 					],
 					details: makeDetails("single")([result]),
@@ -1273,57 +1232,6 @@ export default function (pi: ExtensionAPI) {
 
 			const text = result.content[0];
 			return new Text(text?.type === "text" ? text.text : "(no output)", 0, 0);
-		},
-	});
-
-	pi.registerCommand("subagent-inspect", {
-		description: "Inspect subagent transcript and history by session ID",
-		handler: async (args, ctx) => {
-			const id = (args || "").trim();
-			if (!id) {
-				const list = listRecentSubagents();
-				if (list.length === 0) {
-					if (ctx.hasUI && (ctx.ui as any).notify) {
-						await (ctx.ui as any).notify("No subagent sessions found in cache.");
-					}
-					return;
-				}
-				if (ctx.hasUI && ctx.ui.select) {
-					const chosen = await ctx.ui.select(
-						"Select subagent session to inspect:",
-						list.map((s) => `${s.id} (${new Date(s.mtime).toLocaleTimeString()})`),
-					);
-					if (chosen) {
-						const chosenId = chosen.split(" ")[0];
-						await inspectSubagent(pi, ctx, chosenId);
-					}
-				}
-				return;
-			}
-			await inspectSubagent(pi, ctx, id);
-		},
-	});
-
-	pi.registerShortcut("ctrl+alt+s", {
-		description: "Open Subagent Inspector",
-		handler: async (ctx) => {
-			const list = listRecentSubagents();
-			if (list.length === 0) {
-				if (ctx.hasUI && (ctx.ui as any).notify) {
-					await (ctx.ui as any).notify("No subagent sessions found in cache.");
-				}
-				return;
-			}
-			if (ctx.hasUI && ctx.ui.select) {
-				const chosen = await ctx.ui.select(
-					"Select subagent session to inspect:",
-					list.map((s) => `${s.id} (${new Date(s.mtime).toLocaleTimeString()})`),
-				);
-				if (chosen) {
-					const chosenId = chosen.split(" ")[0];
-					await inspectSubagent(pi, ctx, chosenId);
-				}
-			}
 		},
 	});
 }
