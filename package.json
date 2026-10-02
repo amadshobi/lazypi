@@ -1,6 +1,6 @@
 {
   "name": "lazypi",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A lazy, batteries-included extension bundle & prompt suite for Pi Coding Agent",
   "keywords": [
     "pi-package"
